@@ -1,4 +1,4 @@
-package me.dragonflyer.minimetro;
+package me.dragonflyer.minimetro.gui.model;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -18,39 +18,39 @@ public class LineSection {
 	this.color = color;
     }
 
-    Station getStation1() {
+    public Station getStation1() {
 	return station1;
     }
 
-    Station getStation2() {
+    public Station getStation2() {
 	return station2;
     }
 
-    int getStation1Direction() {
+    public int getStation1Direction() {
 	return station1Direction;
     }
 
-    int getStation1Platform() {
+    public int getStation1Platform() {
 	return station1Platform;
     }
 
-    int getStation2Direction() {
+    public int getStation2Direction() {
 	return station2Direction;
     }
 
-    int getStation2Platform() {
+    public int getStation2Platform() {
 	return station2Platform;
     }
 
-    boolean hasInflectionLocation() {
+    public boolean hasInflectionLocation() {
 	return inflectionLocation != null;
     }
 
-    Point getInflectionLocation() {
+    public Point getInflectionLocation() {
 	return inflectionLocation;
     }
 
-    Color getColor() {
+    public Color getColor() {
 	return color;
     }
 }

@@ -1,4 +1,4 @@
-package me.dragonflyer.minimetro;
+package me.dragonflyer.minimetro.gui.model;
 
 public class CircleLine extends Line {
 

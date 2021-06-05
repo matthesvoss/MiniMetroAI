@@ -1,4 +1,4 @@
-package me.dragonflyer.minimetro;
+package me.dragonflyer.minimetro.gui.model;
 
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -13,7 +13,7 @@ public class Station {
     private int[] platforms = new int[8];
     private int test;
 
-    enum Type {
+    public enum Type {
         CIRCLE("circle.png"), TRIANGLE("triangle.png"), SQUARE("square.png"), CROSS("cross.png"), RHOMBUS("rhombus.png"), LEAF("leaf.png"), DIAMOND("diamond.png"), PENTAGON("pentagon.png"), STAR("star.png"), DROP("drop.png");
 
         private String iconName;
@@ -27,11 +27,11 @@ public class Station {
         }
     }
 
-    Station(int test) {
+    public Station(int test) {
         this.test = test;
     }
 
-    Station(Point location, Type type) {
+    public Station(Point location, Type type) {
         this.location = location;
         this.type = type;
         try {
@@ -41,23 +41,23 @@ public class Station {
         }
     }
 
-    Point getLocation() {
+    public Point getLocation() {
         return location;
     }
 
-    int getX() {
+    public int getX() {
         return location.x;
     }
 
-    int getY() {
+    public int getY() {
         return location.y;
     }
 
-    Type getType() {
+    public Type getType() {
         return type;
     }
 
-    void setType(Type type) {
+    public void setType(Type type) {
         this.type = type;
         try {
             icon = ImageIO.read(getClass().getClassLoader().getResource(type.getIconName()));
@@ -66,7 +66,7 @@ public class Station {
         }
     }
 
-    BufferedImage getIcon() {
+    public BufferedImage getIcon() {
         return icon;
     }
 
@@ -74,7 +74,7 @@ public class Station {
         return platforms[direction] < 3;
     }
 
-    int getUsedPlatforms(int direction) {
+    public int getUsedPlatforms(int direction) {
         return platforms[direction];
     }
 
@@ -82,7 +82,7 @@ public class Station {
         return platforms[direction]++;// ++...?
     }
 
-    int getTest() {
+    public int getTest() {
         return test;
     }
 

@@ -1,4 +1,4 @@
-package me.dragonflyer.minimetro;
+package me.dragonflyer.minimetro.gui.model;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -9,23 +9,23 @@ public class Line {
     private Station[] stations;
     private ArrayList<LineSection> lineSections = new ArrayList<>();
 
-    Line(Station[] stations) {
+    public Line(Station[] stations) {
         this.stations = stations;
     }
 
-    Station[] getStations() {
+    public Station[] getStations() {
         return stations;
     }
 
-    ArrayList<LineSection> getLineSections() {
+    public ArrayList<LineSection> getLineSections() {
         return lineSections;
     }
 
-    boolean addLineSection(Station station1, Station station2, int station1Direction, int station2Direction, Color color) {
+    public boolean addLineSection(Station station1, Station station2, int station1Direction, int station2Direction, Color color) {
         return addLineSection(station1, station2, station1Direction, station2Direction, null, color);
     }
 
-    boolean addLineSection(Station station1, Station station2, int station1Direction, int station2Direction, Point inflectionLocation, Color color) {
+    public boolean addLineSection(Station station1, Station station2, int station1Direction, int station2Direction, Point inflectionLocation, Color color) {
         if (station1.hasFreePlatform(station1Direction) && station2.hasFreePlatform(station2Direction)) {
             lineSections.add(new LineSection(station1, station2, station1Direction, station1.addPlatform(station1Direction), station2Direction, station2.addPlatform(station2Direction), inflectionLocation, color));
             return true;

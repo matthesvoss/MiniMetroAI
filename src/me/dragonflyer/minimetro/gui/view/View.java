@@ -1,11 +1,6 @@
-package me.dragonflyer.minimetro;
+package me.dragonflyer.minimetro.gui.view;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -18,6 +13,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -32,12 +28,26 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import me.dragonflyer.minimetro.Station.Type;
+import me.dragonflyer.minimetro.gui.controller.Controller;
+import me.dragonflyer.minimetro.gui.model.Line;
+import me.dragonflyer.minimetro.gui.model.LineSection;
+import me.dragonflyer.minimetro.gui.model.Model;
+import me.dragonflyer.minimetro.gui.model.Station;
+import me.dragonflyer.minimetro.gui.model.Station.Type;
 
-public class Frame extends JPanel {
+public class View extends JPanel {
+
     private static final long serialVersionUID = 1L;
+
+    private Controller controller;
+    private Model model;
+
     private JFrame frame;
-    private BufferedImage stationSelection;
+    private JLabel linesLabel, carriagesLabel, tunnelsLabel;
+    private JSpinner linesSpinner, carriagesSpinner, tunnelsSpinner;
+    private JButton goButton;
+
+    private ResourceManager resourceManager = new ResourceManager();
     private int gridSize = 39, maxGridSize = 150, gridWidth = 44, gridHeight = 26;// 48x30 3 gleise pro ausgang, 8 ausgänge, ubersprungene stationen kennzeichnen
     private Point2D.Double oldCenter = new Point2D.Double(), center = new Point2D.Double(22, 13);
     private Point p, currentLocation;
@@ -46,16 +56,42 @@ public class Frame extends JPanel {
     private HashSet<Line> lines = new HashSet<>();
     private Color[] lineColors = new Color[] { new Color(225, 23, 30), new Color(81, 39, 132), new Color(0, 118, 187), new Color(1, 150, 99), new Color(218, 74, 141), new Color(121, 67, 31), new Color(156, 188, 75) };
 
-    public static void main(String[] args) {
-        new Frame();
+    public View(Controller controller, Model model) {
+        this.controller = controller;
+        this.model = model;
+
+        createFrame();
+        createPanel();
+
+        addActionListeners();
+        addResizeListener();
+        addMouseListeners();
+
+        resourceManager.loadImages();
+
+        frame.setVisible(true);
+//	ArrayList<Station> availableStations = new ArrayList<>();
+//	availableStations.add(new Station(new Point(1, 1), Type.CIRCLE));
+//	availableStations.add(new Station(new Point(1, 2), Type.TRIANGLE));
+//	availableStations.add(new Station(new Point(2, 1), Type.SQUARE));
+//	availableStations.add(new Station(new Point(2, 2), Type.DIAMOND));
+//	ArrayList<ArrayList<Station>> stationPermutations = generatePermutationsNoRepetition(availableStations);
+//	for (ArrayList<Station> permutation : stationPermutations) {
+//	    for (Station station : permutation) {
+//		station.print();
+//		System.out.print(",");
+//	    }
+//	    System.out.println();
+//	}
     }
 
-    private Frame() {
+    private void createFrame() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
         frame = new JFrame("Mini Metro");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1600, 900);
@@ -63,17 +99,20 @@ public class Frame extends JPanel {
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setLayout(null);
         frame.setContentPane(this);
+    }
+
+    private void createPanel() {
         setLayout(null);
         setBackground(Color.BLACK);
 
-        JLabel linesLabel = new JLabel("Lines:", SwingConstants.CENTER);
+        linesLabel = new JLabel("Lines:", SwingConstants.CENTER);
         linesLabel.setBackground(Color.BLACK);
         linesLabel.setForeground(Color.WHITE);
         linesLabel.setOpaque(true);
         linesLabel.setBorder(null);
         linesLabel.setFont(linesLabel.getFont().deriveFont(30f));
         add(linesLabel);
-        JSpinner linesSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 7, 1));
+        linesSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 7, 1));
         linesSpinner.setBackground(Color.BLACK);
         linesSpinner.setForeground(Color.WHITE);
         linesSpinner.setOpaque(true);
@@ -81,14 +120,14 @@ public class Frame extends JPanel {
         linesSpinner.setFont(linesSpinner.getFont().deriveFont(30f));
         add(linesSpinner);
 
-        JLabel carriagesLabel = new JLabel("Carriages:", SwingConstants.CENTER);
+        carriagesLabel = new JLabel("Carriages:", SwingConstants.CENTER);
         carriagesLabel.setBackground(Color.BLACK);
         carriagesLabel.setForeground(Color.WHITE);
         carriagesLabel.setOpaque(true);
         carriagesLabel.setBorder(null);
         carriagesLabel.setFont(carriagesLabel.getFont().deriveFont(30f));
         add(carriagesLabel);
-        JSpinner carriagesSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 99, 1));
+        carriagesSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 99, 1));
         carriagesSpinner.setBackground(Color.BLACK);
         carriagesSpinner.setForeground(Color.WHITE);
         carriagesSpinner.setOpaque(true);
@@ -96,14 +135,14 @@ public class Frame extends JPanel {
         carriagesSpinner.setFont(carriagesSpinner.getFont().deriveFont(30f));
         add(carriagesSpinner);
 
-        JLabel tunnelsLabel = new JLabel("Tunnels:", SwingConstants.CENTER);
+        tunnelsLabel = new JLabel("Tunnels:", SwingConstants.CENTER);
         tunnelsLabel.setBackground(Color.BLACK);
         tunnelsLabel.setForeground(Color.WHITE);
         tunnelsLabel.setOpaque(true);
         tunnelsLabel.setBorder(null);
         tunnelsLabel.setFont(tunnelsLabel.getFont().deriveFont(30f));
         add(tunnelsLabel);
-        JSpinner tunnelsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 99, 1));
+        tunnelsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 99, 1));
         tunnelsSpinner.setBackground(Color.BLACK);
         tunnelsSpinner.setForeground(Color.WHITE);
         tunnelsSpinner.setOpaque(true);
@@ -111,14 +150,18 @@ public class Frame extends JPanel {
         tunnelsSpinner.setFont(tunnelsSpinner.getFont().deriveFont(30f));
         add(tunnelsSpinner);
 
-        JButton go = new JButton("Go");
-        go.setBackground(Color.BLACK);
-        go.setForeground(Color.WHITE);
-        go.setContentAreaFilled(false);
-        go.setOpaque(true);
-        go.setBorder(null);
-        go.setFont(go.getFont().deriveFont(30f));
-        go.addActionListener(new ActionListener() {
+        goButton = new JButton("Go");
+        goButton.setBackground(Color.BLACK);
+        goButton.setForeground(Color.WHITE);
+        goButton.setContentAreaFilled(false);
+        goButton.setOpaque(true);
+        goButton.setBorder(null);
+        goButton.setFont(goButton.getFont().deriveFont(30f));
+        add(goButton);
+    }
+
+    private void addActionListeners() {
+        goButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {// waggons, tunnel, flüsse, übersprungene stationen, scharfe kurven (zug muss
                 // anhalten)
@@ -402,8 +445,9 @@ public class Frame extends JPanel {
                 repaint();
             }
         });
-        add(go);
+    }
 
+    private void addResizeListener() {
         frame.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -416,16 +460,12 @@ public class Frame extends JPanel {
                 carriagesSpinner.setBounds(width / 2 + 10, height - 50, 50, 40);
                 tunnelsLabel.setBounds(width / 2 + 70, height - 50, 120, 40);
                 tunnelsSpinner.setBounds(width / 2 + 190, height - 50, 50, 40);
-                go.setBounds(width / 2 + 250, height - 50, 40, 40);
+                goButton.setBounds(width / 2 + 250, height - 50, 40, 40);
             }
         });
+    }
 
-        try {
-            stationSelection = ImageIO.read(getClass().getClassLoader().getResource("stationselection.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+    private void addMouseListeners() {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -553,21 +593,6 @@ public class Frame extends JPanel {
                 repaint();
             }
         });
-
-        frame.setVisible(true);
-//	ArrayList<Station> availableStations = new ArrayList<>();
-//	availableStations.add(new Station(new Point(1, 1), Type.CIRCLE));
-//	availableStations.add(new Station(new Point(1, 2), Type.TRIANGLE));
-//	availableStations.add(new Station(new Point(2, 1), Type.SQUARE));
-//	availableStations.add(new Station(new Point(2, 2), Type.DIAMOND));
-//	ArrayList<ArrayList<Station>> stationPermutations = generatePermutationsNoRepetition(availableStations);
-//	for (ArrayList<Station> permutation : stationPermutations) {
-//	    for (Station station : permutation) {
-//		station.print();
-//		System.out.print(",");
-//	    }
-//	    System.out.println();
-//	}
     }
 
     private Point locationToPoint(Point p) {
@@ -663,6 +688,7 @@ public class Frame extends JPanel {
         // draw station selection
         if (currentLocation != null) {
             Point currentPoint = locationToPoint(new Point(currentLocation.x - 3, currentLocation.y - 3));
+            Image stationSelection = resourceManager.getImage("stationselection");
             g2.drawImage(stationSelection, currentPoint.x, currentPoint.y, 6 * gridSize, 6 * gridSize, null);
         }
     }
