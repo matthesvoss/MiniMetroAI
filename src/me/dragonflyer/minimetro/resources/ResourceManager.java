@@ -1,6 +1,9 @@
-package me.dragonflyer.minimetro.gui.view;
+package me.dragonflyer.minimetro.resources;
+
+import me.dragonflyer.minimetro.gui.model.entities.Station;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
@@ -10,14 +13,13 @@ import java.util.Map;
 public class ResourceManager {
 
     private Map<String, BufferedImage> images = new HashMap<>();
-    private final String[] imageNames = new String[] {"circle", "cross", "diamond", "drop",
-            "leaf", "pentagon", "rhombus", "square", "star", "stationselection", "triangle" };
 
     public void loadImages() {
-        for (String imageName : imageNames) {
-            String imageLocation = "/" + imageName + ".png";
-            images.put(imageName, loadImage(imageLocation));
+        for (Station.Type stationType : Station.Type.values()) {
+            String imageLocation = "/" + stationType.getName() + ".png";
+            images.put(stationType.getName(), loadImage(imageLocation));
         }
+        images.put("stationselection", loadImage("/stationselection.png"));
     }
 
     private BufferedImage loadImage(String imageLocation) {
@@ -28,11 +30,11 @@ public class ResourceManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
-    public BufferedImage getImage(String imageName) {
+    public Image getImage(String imageName) {
         return images.get(imageName);
     }
+
 }
