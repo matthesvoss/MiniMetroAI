@@ -1,50 +1,62 @@
 package me.dragonflyer.minimetro.gui.model.entities;
 
 import me.dragonflyer.minimetro.gui.model.Model;
+import me.dragonflyer.minimetro.gui.model.exceptions.NoFreePlatformException;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 
 public class LineSection {
-
     private Line line;
+
     private Station station1, station2;
     private Direction platform1Dir, platform2Dir;
     private Platform platform1, platform2;
-    private Point platform1Loc, platform2Loc;
-    private Point inflectionLoc;
+    private Turn turn;
+    private Point2D.Double platform1Loc, platform2Loc;
+    private Point2D.Double inflectionLoc;
+    private boolean hasInflectionLoc = false;
+    private int absXDiff, absYDiff;
 
-    LineSection(Line line, Station station1, Station station2, Direction platform1Dir, Direction platform2Dir, Platform platform1, Platform platform2, Point inflectionLoc) {
+    public LineSection(Line line, Station station1, Station station2, int absXDiff, int absYDiff) {
         this.line = line;
         this.station1 = station1;
         this.station2 = station2;
-        this.platform1Dir = platform1Dir;
-        this.platform2Dir = platform2Dir;
-        this.platform1 = platform1;
-        this.platform2 = platform2;
-        this.platform1Loc = station1.getLocation();
-        this.platform2Loc = station2.getLocation();
-        this.inflectionLoc = inflectionLoc;
+        this.absXDiff = absXDiff;
+        this.absYDiff = absYDiff;
+
+        Point station1Loc = station1.getLocation();
+        this.platform1Loc = new Point2D.Double(station1Loc.getX(), station1Loc.getY());
+        Point station2Loc = station2.getLocation();
+        this.platform2Loc = new Point2D.Double(station2Loc.getX(), station2Loc.getY());
     }
 
-    public void applyPlatformOffsets() {
-        Model model = Model.getInstance();
-        double lineWidth = model.getLineWidth();
-        int straightOffset = (int) Math.round(lineWidth);
-        int diagonalOffset = (int) Math.round(lineWidth / Math.sqrt(2d));
+    public void applyOffsets() {
+        double lineWidth = 0.1d;
 
-        // calculate platform1Loc and platform2Loc offsets
-        Point platform1Offset = station1.getPlatformDirection(platform1Dir).getPlatformOffset(platform1, straightOffset, diagonalOffset);
-        Point platform2Offset = station2.getPlatformDirection(platform2Dir).getPlatformOffset(platform2, straightOffset, diagonalOffset);
-
-        platform1Loc.translate(platform1Offset.x, platform1Offset.y);
-        platform2Loc.translate(platform2Offset.x, platform2Offset.y);
-
-        if (inflectionLoc != null) {
-            // calculate inflectionLoc offset
-            //TODO test if correct
-            inflectionLoc.translate(platform1Offset.x, platform1Offset.y);
-            inflectionLoc.translate(platform2Offset.x, platform2Offset.y);
+        applyPlatformOffsets(lineWidth);
+        if (hasInflectionLoc) {
+            applyInflectionOffset(lineWidth);
         }
+    }
+
+    private void applyPlatformOffsets(double lineWidth) {
+        // calculate platform1Loc and platform2Loc offsets
+        Point2D.Double platform1Offset = platform1.getPlatformOffset(lineWidth);
+        Point2D.Double platform2Offset = platform2.getPlatformOffset(lineWidth);
+
+        platform1Loc.x += platform1Offset.x;
+        platform1Loc.y += platform1Offset.y;
+        platform2Loc.x += platform2Offset.x;
+        platform2Loc.y += platform2Offset.y;
+    }
+
+    private void applyInflectionOffset(double lineWidth) {
+        Point2D.Double inflectionOffset1 = platform1.getInflectionOffset(lineWidth, absXDiff, absYDiff, turn);
+        Point2D.Double inflectionOffset2 = platform2.getInflectionOffset(lineWidth, absXDiff, absYDiff, turn);
+
+        inflectionLoc.x += inflectionOffset1.x + inflectionOffset2.x;
+        inflectionLoc.y += inflectionOffset1.y + inflectionOffset2.y;
     }
 
     public Station getStation1() {
@@ -59,32 +71,67 @@ public class LineSection {
         return platform1Dir;
     }
 
+    public void setPlatform1Dir(Direction platform1Dir) {
+        this.platform1Dir = platform1Dir;
+    }
+
     public Direction getPlatform2Direction() {
         return platform2Dir;
+    }
+
+    public void setPlatform2Dir(Direction platform2Dir) {
+        this.platform2Dir = platform2Dir;
     }
 
     public Platform getPlatform1() {
         return platform1;
     }
 
+    public void setPlatform1(Platform platform1) {
+        this.platform1 = platform1;
+    }
+
     public Platform getPlatform2() {
         return platform2;
     }
 
-    public Point getPlatform1Loc() {
+    public void setPlatform2(Platform platform2) {
+        this.platform2 = platform2;
+    }
+
+    public Point2D.Double getPlatform1Loc() {
         return platform1Loc;
     }
 
-    public Point getPlatform2Loc() {
+    public Point2D.Double getPlatform2Loc() {
         return platform2Loc;
     }
 
     public boolean hasInflectionLocation() {
-        return inflectionLoc != null;
+        return hasInflectionLoc;
     }
 
-    public Point getInflectionLocation() {
+    public void setInflectionLoc(Point inflectionLoc) {
+        this.inflectionLoc = new Point2D.Double(inflectionLoc.getX(), inflectionLoc.getY());
+        hasInflectionLoc = true;
+    }
+
+    public Point2D.Double getInflectionLocation() {
         return inflectionLoc;
     }
 
+    public enum Turn {
+        LEFT, RIGHT;
+
+        public Turn opposite(Turn turn) {
+            switch (turn) {
+                case LEFT:
+                    return RIGHT;
+                case RIGHT:
+                    return LEFT;
+                default:
+                    return null;
+            }
+        }
+    }
 }

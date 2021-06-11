@@ -12,7 +12,18 @@ import java.util.Map;
 
 public class ResourceManager {
 
+    private static ResourceManager resourceManager;
+
     private Map<String, BufferedImage> images = new HashMap<>();
+
+    private ResourceManager() {}
+
+    public static ResourceManager getInstance() {
+        if (resourceManager == null) {
+            resourceManager = new ResourceManager();
+        }
+        return resourceManager;
+    }
 
     public void loadImages() {
         for (Station.Type stationType : Station.Type.values()) {

@@ -1,31 +1,20 @@
 package me.dragonflyer.minimetro.gui.model.entities;
 
-import java.awt.*;
+import me.dragonflyer.minimetro.gui.model.exceptions.NoFreePlatformException;
 
 public class PlatformDirection {
 
     private Direction dir;
-    private Platform leftPlatform = Platform.LEFT;
-    private Platform middlePlatform = Platform.MIDDLE;
-    private Platform rightPlatform = Platform.RIGHT;
+    private Platform leftPlatform, middlePlatform, rightPlatform;
 
     public PlatformDirection(Direction dir) {
         this.dir = dir;
+        leftPlatform = new Platform(dir, Platform.Lane.LEFT);
+        middlePlatform = new Platform(dir, Platform.Lane.MIDDLE);
+        rightPlatform = new Platform(dir, Platform.Lane.RIGHT);
     }
 
-    public Direction getDirection() {
-        return dir;
-    }
-
-    public void setDirection(Direction dir) {
-        this.dir = dir;
-    }
-
-    public boolean hasFreePlatform() {
-        return !leftPlatform.isUsed() || !middlePlatform.isUsed() || !rightPlatform.isUsed();
-    }
-
-    public Platform getFreePlatform() {
+    public Platform getFreePlatform() throws NoFreePlatformException {
         if (!middlePlatform.isUsed()) {
             return middlePlatform;
         }
@@ -35,61 +24,30 @@ public class PlatformDirection {
         if (!rightPlatform.isUsed()) {
             return rightPlatform;
         }
-        return null;
+        throw new NoFreePlatformException();
     }
 
-    public Point getPlatformOffset(Platform platform, int straightOffset, int diagonalOffset) {
-        Point offset = new Point();
-        if (platform == Platform.LEFT) { //TODO test ==
-            offset = getLeftPlatformOffset(straightOffset, diagonalOffset);
-        } else if (platform == Platform.RIGHT) {
-            offset = getRightPlatformOffset(straightOffset, diagonalOffset);
-        }
-        return offset;
-    }
-
-    private Point getLeftPlatformOffset(int straightOffset, int diagonalOffset) {
-        Point offset = new Point();
-        switch (dir) {
-            case N:
-                offset.x = straightOffset;
+    public Platform getOppositePlatform(Platform platform) throws NoFreePlatformException {
+        switch (platform.getLane()) {
+            case LEFT:
+                if (!rightPlatform.isUsed()) {
+                    return rightPlatform;
+                }
                 break;
-            case NE:
-                offset.x = diagonalOffset;
-                offset.y = diagonalOffset;
+            case MIDDLE:
+                if (!middlePlatform.isUsed()) {
+                    return middlePlatform;
+                }
                 break;
-            case E:
-                offset.y = straightOffset;
-                break;
-            case SE:
-                offset.x = -diagonalOffset;
-                offset.y = diagonalOffset;
-                break;
-            case S:
-                offset.x = -straightOffset;
-                break;
-            case SW:
-                offset.x = -diagonalOffset;
-                offset.y = -diagonalOffset;
-                break;
-            case W:
-                offset.y = -straightOffset;
-                break;
-            case NW:
-                offset.x = diagonalOffset;
-                offset.y = -diagonalOffset;
+            case RIGHT:
+                if (!leftPlatform.isUsed()) {
+                    return leftPlatform;
+                }
                 break;
             default:
                 break;
         }
-        return offset;
-    }
-
-    private Point getRightPlatformOffset(int straightOffset, int diagonalOffset) {
-        Point offset = getLeftPlatformOffset(straightOffset, diagonalOffset);
-        offset.x = -offset.x;
-        offset.y = -offset.y;
-        return offset;
+        throw new NoFreePlatformException();
     }
 
 }

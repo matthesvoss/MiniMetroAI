@@ -26,7 +26,7 @@ public class View extends JPanel {
     private JSpinner linesSpinner, carriagesSpinner, tunnelsSpinner;
     private JButton goButton;
 
-    private ResourceManager resourceManager = new ResourceManager();
+    private Image stationSelectionImage;
 
     public View(Controller controller, Model model) {
         this.controller = controller;
@@ -41,7 +41,7 @@ public class View extends JPanel {
         addResizeListener();
         addMouseListeners();
 
-        resourceManager.loadImages();
+        loadImages();
 
         frame.setVisible(true);
 //	ArrayList<Station> availableStations = new ArrayList<>();
@@ -163,6 +163,12 @@ public class View extends JPanel {
         addMouseWheelListener(mouseEventListener);
     }
 
+    private void loadImages() {
+        ResourceManager resourceManager = ResourceManager.getInstance();
+        resourceManager.loadImages();
+        stationSelectionImage = resourceManager.getImage("stationselection");
+    }
+
     public int getNumberOfLines() {
         return (int) linesSpinner.getValue();
     }
@@ -173,10 +179,6 @@ public class View extends JPanel {
 
     public int getNumberOfTunnels() {
         return (int) tunnelsSpinner.getValue();
-    }
-
-    public ResourceManager getResourceManager() {
-        return resourceManager;
     }
 
     @Override
@@ -220,7 +222,7 @@ public class View extends JPanel {
     }
 
     private void drawLineSections(Graphics2D g2d) {
-        double lineWidth = model.getLineWidth();
+        double lineWidth = model.gridSize / 10d;
         g2d.setStroke(new BasicStroke((float) lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         for (Line line : model.getLines()) {
             g2d.setColor(line.getColor());
@@ -249,7 +251,6 @@ public class View extends JPanel {
     private void drawStationSelection(Graphics2D g2d) {
         if (model.isLocationSelected()) {
             Point stationSelectionTopLeft = model.locationToPoint(new Point(model.selectedLocation.x - 3, model.selectedLocation.y - 3));
-            Image stationSelectionImage = resourceManager.getImage("stationselection");
             g2d.drawImage(stationSelectionImage, stationSelectionTopLeft.x, stationSelectionTopLeft.y, 6 * model.gridSize, 6 * model.gridSize, null);
 
             if (!model.isStationSelected()) {

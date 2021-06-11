@@ -236,8 +236,27 @@ public class Model {
         }*/
 
 
-        Line connectingLine = new Line(stations.toArray(new Station[0]), lineColors[0]);
-        lines.add(connectingLine);
+//        Line connectingLine = new Line(stations.toArray(new Station[0]), lineColors[0]);
+//        lines.add(connectingLine);
+
+        stations.clear();
+        Station s1 = new Station(1, new Point(0, 0), Station.Type.CIRCLE);
+        Station s2 = new Station(2, new Point(4, 2), Station.Type.CROSS);
+        Station s3 = new Station(3, new Point(3, 4), Station.Type.STAR);
+        stations.add(s1);
+        stations.add(s2);
+        stations.add(s3);
+
+        Line l1 = new Line(new Station[] { s1, s2, s3 }, lineColors[0]);
+        lines.add(l1);
+        Line l2 = new Line(new Station[] { s1, s2}, lineColors[1]);
+        lines.add(l2);
+        Line l3 = new Line(new Station[] { s1, s2, s3 }, lineColors[2]);
+        lines.add(l3);
+        Line l4= new Line(new Station[] { s1, s3 }, lineColors[3]);
+        lines.add(l4);
+
+
         for (Line line : lines) {
             try {
                 line.calculateLineSections();
@@ -309,13 +328,10 @@ public class Model {
                     Station.Type selectedType = getStationTypeForDegree(degree);
 
                     if (!isStationSelected()) { // add new station of selected type
-                        Image icon = view.getResourceManager().getImage(selectedType.getName());
-                        Station newStation = new Station(selectedLocation, selectedType, icon);
+                        Station newStation = new Station(selectedLocation, selectedType);
                         stations.add(newStation);
                     } else if (selectedStation.getType() != selectedType) { // change station type and icon
                         selectedStation.setType(selectedType);
-                        Image icon = view.getResourceManager().getImage(selectedType.getName());
-                        selectedStation.setIcon(icon);
                     }
                 }
             }
@@ -501,9 +517,5 @@ public class Model {
 
     private double clamp(double x, double min, double max) {
         return Math.max(min, Math.min(x, max));
-    }
-
-    public double getLineWidth() {
-        return gridSize / 10d;
     }
 }
