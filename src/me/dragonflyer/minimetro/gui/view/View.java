@@ -39,26 +39,14 @@ public class View extends JPanel {
         createFrame();
         createPanel();
 
-        addActionListeners();
         addResizeListener();
+        addChangeListeners();
+        addActionListeners();
         addMouseListeners();
 
         loadImages();
 
         frame.setVisible(true);
-//	ArrayList<Station> availableStations = new ArrayList<>();
-//	availableStations.add(new Station(new IntPoint(1, 1), Type.CIRCLE));
-//	availableStations.add(new Station(new IntPoint(1, 2), Type.TRIANGLE));
-//	availableStations.add(new Station(new IntPoint(2, 1), Type.SQUARE));
-//	availableStations.add(new Station(new IntPoint(2, 2), Type.DIAMOND));
-//	ArrayList<ArrayList<Station>> stationPermutations = generatePermutationsNoRepetition(availableStations);
-//	for (ArrayList<Station> permutation : stationPermutations) {
-//	    for (Station station : permutation) {
-//		station.print();
-//		System.out.print(",");
-//	    }
-//	    System.out.println();
-//	}
     }
 
     private void createFrame() {
@@ -136,6 +124,12 @@ public class View extends JPanel {
         add(goButton);
     }
 
+    private void addChangeListeners() {
+        linesSpinner.addChangeListener(e -> controller.numberOfLinesChanged((int) linesSpinner.getValue()));
+        carriagesSpinner.addChangeListener(e -> controller.numberOfCarriagesChanged((int) carriagesSpinner.getValue()));
+        tunnelsSpinner.addChangeListener(e -> controller.numberOfTunnelsChanged((int) tunnelsSpinner.getValue()));
+    }
+
     private void addActionListeners() {
         goButton.addActionListener(e -> controller.goButtonClicked());
     }
@@ -169,18 +163,6 @@ public class View extends JPanel {
         ResourceManager resourceManager = ResourceManager.getInstance();
         resourceManager.loadImages();
         stationSelectionImage = resourceManager.getImage("stationselection");
-    }
-
-    public int getNumberOfLines() {
-        return (int) linesSpinner.getValue();
-    }
-
-    public int getNumberOfCarriages() {
-        return (int) carriagesSpinner.getValue();
-    }
-
-    public int getNumberOfTunnels() {
-        return (int) tunnelsSpinner.getValue();
     }
 
     @Override

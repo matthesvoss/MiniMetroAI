@@ -49,18 +49,16 @@ public class LineSection {
         DoublePoint platform1Offset = platform1.getPlatformOffset(lineWidth);
         DoublePoint platform2Offset = platform2.getPlatformOffset(lineWidth);
 
-        platform1Loc.x += platform1Offset.x;
-        platform1Loc.y += platform1Offset.y;
-        platform2Loc.x += platform2Offset.x;
-        platform2Loc.y += platform2Offset.y;
+        platform1Loc.translate(platform1Offset);
+        platform2Loc.translate(platform2Offset);
     }
 
     private void applyInflectionOffset(double lineWidth) {
         DoublePoint inflectionOffset1 = platform1.getInflectionOffset(lineWidth, absXDiff, absYDiff, turn);
         DoublePoint inflectionOffset2 = platform2.getInflectionOffset(lineWidth, absXDiff, absYDiff, turn.getOpposite());
 
-        inflectionLoc.x += inflectionOffset1.x + inflectionOffset2.x;
-        inflectionLoc.y += inflectionOffset1.y + inflectionOffset2.y;
+        inflectionOffset1.translate(inflectionOffset2);
+        inflectionLoc.translate(inflectionOffset1);
     }
 
     public Station getStation1() {
@@ -117,7 +115,7 @@ public class LineSection {
 
     public void setInflectionLoc(IntPoint inflectionLoc) {
         this.inflectionLoc = new DoublePoint(inflectionLoc.getX(), inflectionLoc.getY());
-        hasInflectionLoc = true;
+        this.hasInflectionLoc = true;
     }
 
     public DoublePoint getInflectionLocation() {
@@ -132,11 +130,14 @@ public class LineSection {
         LEFT, RIGHT;
 
         public Turn getOpposite() {
-            return switch (this) {
-                case LEFT -> RIGHT;
-                case RIGHT -> LEFT;
-                default -> null;
-            };
+            switch (this) {
+                case LEFT:
+                    return RIGHT;
+                case RIGHT:
+                    return LEFT;
+                default:
+                    return null;
+            }
         }
     }
 }

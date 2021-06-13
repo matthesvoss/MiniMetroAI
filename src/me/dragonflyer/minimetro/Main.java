@@ -6,7 +6,7 @@ import me.dragonflyer.minimetro.gui.model.Model;
 public class Main {
 
     public static void main(String[] args) {
-        Model model = Model.getInstance();
+        Model model = new Model();
         Controller controller = new Controller(model);
         controller.startUp();
     }
