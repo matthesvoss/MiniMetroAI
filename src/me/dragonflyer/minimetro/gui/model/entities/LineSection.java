@@ -1,21 +1,25 @@
 package me.dragonflyer.minimetro.gui.model.entities;
 
-import me.dragonflyer.minimetro.gui.model.Model;
-import me.dragonflyer.minimetro.gui.model.exceptions.NoFreePlatformException;
+import me.dragonflyer.minimetro.gui.model.geom.DoublePoint;
+import me.dragonflyer.minimetro.gui.model.geom.IntPoint;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
 
 public class LineSection {
+
     private Line line;
 
     private Station station1, station2;
     private Direction platform1Dir, platform2Dir;
     private Platform platform1, platform2;
-    private Turn turn;
-    private Point2D.Double platform1Loc, platform2Loc;
-    private Point2D.Double inflectionLoc;
+
+    private DoublePoint platform1Loc, platform2Loc;
+
+    private DoublePoint inflectionLoc;
     private boolean hasInflectionLoc = false;
+    private Turn turn;
+
     private int absXDiff, absYDiff;
 
     public LineSection(Line line, Station station1, Station station2, int absXDiff, int absYDiff) {
@@ -25,10 +29,10 @@ public class LineSection {
         this.absXDiff = absXDiff;
         this.absYDiff = absYDiff;
 
-        Point station1Loc = station1.getLocation();
-        this.platform1Loc = new Point2D.Double(station1Loc.getX(), station1Loc.getY());
-        Point station2Loc = station2.getLocation();
-        this.platform2Loc = new Point2D.Double(station2Loc.getX(), station2Loc.getY());
+        IntPoint station1Loc = station1.getLocation();
+        this.platform1Loc = new DoublePoint(station1Loc.getX(), station1Loc.getY());
+        IntPoint station2Loc = station2.getLocation();
+        this.platform2Loc = new DoublePoint(station2Loc.getX(), station2Loc.getY());
     }
 
     public void applyOffsets() {
@@ -42,8 +46,8 @@ public class LineSection {
 
     private void applyPlatformOffsets(double lineWidth) {
         // calculate platform1Loc and platform2Loc offsets
-        Point2D.Double platform1Offset = platform1.getPlatformOffset(lineWidth);
-        Point2D.Double platform2Offset = platform2.getPlatformOffset(lineWidth);
+        DoublePoint platform1Offset = platform1.getPlatformOffset(lineWidth);
+        DoublePoint platform2Offset = platform2.getPlatformOffset(lineWidth);
 
         platform1Loc.x += platform1Offset.x;
         platform1Loc.y += platform1Offset.y;
@@ -52,8 +56,8 @@ public class LineSection {
     }
 
     private void applyInflectionOffset(double lineWidth) {
-        Point2D.Double inflectionOffset1 = platform1.getInflectionOffset(lineWidth, absXDiff, absYDiff, turn);
-        Point2D.Double inflectionOffset2 = platform2.getInflectionOffset(lineWidth, absXDiff, absYDiff, turn);
+        DoublePoint inflectionOffset1 = platform1.getInflectionOffset(lineWidth, absXDiff, absYDiff, turn);
+        DoublePoint inflectionOffset2 = platform2.getInflectionOffset(lineWidth, absXDiff, absYDiff, turn.getOpposite());
 
         inflectionLoc.x += inflectionOffset1.x + inflectionOffset2.x;
         inflectionLoc.y += inflectionOffset1.y + inflectionOffset2.y;
@@ -99,11 +103,11 @@ public class LineSection {
         this.platform2 = platform2;
     }
 
-    public Point2D.Double getPlatform1Loc() {
+    public DoublePoint getPlatform1Loc() {
         return platform1Loc;
     }
 
-    public Point2D.Double getPlatform2Loc() {
+    public DoublePoint getPlatform2Loc() {
         return platform2Loc;
     }
 
@@ -111,27 +115,28 @@ public class LineSection {
         return hasInflectionLoc;
     }
 
-    public void setInflectionLoc(Point inflectionLoc) {
-        this.inflectionLoc = new Point2D.Double(inflectionLoc.getX(), inflectionLoc.getY());
+    public void setInflectionLoc(IntPoint inflectionLoc) {
+        this.inflectionLoc = new DoublePoint(inflectionLoc.getX(), inflectionLoc.getY());
         hasInflectionLoc = true;
     }
 
-    public Point2D.Double getInflectionLocation() {
+    public DoublePoint getInflectionLocation() {
         return inflectionLoc;
+    }
+
+    public void setTurn(Turn turn) {
+        this.turn = turn;
     }
 
     public enum Turn {
         LEFT, RIGHT;
 
-        public Turn opposite(Turn turn) {
-            switch (turn) {
-                case LEFT:
-                    return RIGHT;
-                case RIGHT:
-                    return LEFT;
-                default:
-                    return null;
-            }
+        public Turn getOpposite() {
+            return switch (this) {
+                case LEFT -> RIGHT;
+                case RIGHT -> LEFT;
+                default -> null;
+            };
         }
     }
 }

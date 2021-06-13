@@ -6,6 +6,8 @@ import me.dragonflyer.minimetro.gui.model.Model;
 import me.dragonflyer.minimetro.gui.model.entities.Line;
 import me.dragonflyer.minimetro.gui.model.entities.LineSection;
 import me.dragonflyer.minimetro.gui.model.entities.Station;
+import me.dragonflyer.minimetro.gui.model.geom.DoublePoint;
+import me.dragonflyer.minimetro.gui.model.geom.IntPoint;
 import me.dragonflyer.minimetro.resources.ResourceManager;
 
 import javax.swing.*;
@@ -45,10 +47,10 @@ public class View extends JPanel {
 
         frame.setVisible(true);
 //	ArrayList<Station> availableStations = new ArrayList<>();
-//	availableStations.add(new Station(new Point(1, 1), Type.CIRCLE));
-//	availableStations.add(new Station(new Point(1, 2), Type.TRIANGLE));
-//	availableStations.add(new Station(new Point(2, 1), Type.SQUARE));
-//	availableStations.add(new Station(new Point(2, 2), Type.DIAMOND));
+//	availableStations.add(new Station(new IntPoint(1, 1), Type.CIRCLE));
+//	availableStations.add(new Station(new IntPoint(1, 2), Type.TRIANGLE));
+//	availableStations.add(new Station(new IntPoint(2, 1), Type.SQUARE));
+//	availableStations.add(new Station(new IntPoint(2, 2), Type.DIAMOND));
 //	ArrayList<ArrayList<Station>> stationPermutations = generatePermutationsNoRepetition(availableStations);
 //	for (ArrayList<Station> permutation : stationPermutations) {
 //	    for (Station station : permutation) {
@@ -203,8 +205,8 @@ public class View extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(Color.DARK_GRAY);
         g2d.setStroke(new BasicStroke(model.gridSize / 30f));
-        Point topLeft = model.locationToPoint(new Point(0, 0));
-        Point bottomRight = model.locationToPoint(new Point(model.gridWidth, model.gridHeight));
+        Point topLeft = model.locationToPoint(new IntPoint(0, 0));
+        Point bottomRight = model.locationToPoint(new IntPoint(model.gridWidth, model.gridHeight));
         for (int x = 0; x <= model.gridWidth * model.gridSize; x += model.gridSize) {
             g2d.drawLine(topLeft.x + x, topLeft.y, topLeft.x + x, bottomRight.y);
         }
@@ -216,7 +218,7 @@ public class View extends JPanel {
     private void drawStationBackgrounds(Graphics2D g2d) {
         g2d.setColor(Color.BLACK);
         for (Station station : model.getStations()) {
-            Point stationBgTopLeft = model.locationToPoint(new Point(station.getX() - 2, station.getY() - 2));
+            Point stationBgTopLeft = model.locationToPoint(new IntPoint(station.getX() - 2, station.getY() - 2));
             g2d.fillOval(stationBgTopLeft.x, stationBgTopLeft.y, 4 * model.gridSize, 4 * model.gridSize);
         }
     }
@@ -243,14 +245,14 @@ public class View extends JPanel {
     private void drawStationIcons(Graphics2D g2d) {
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         for (Station station : model.getStations()) {
-            Point stationIconTopLeft = model.locationToPoint(new Point2D.Double(station.getX() - 0.4d, station.getY() - 0.4d));
+            Point stationIconTopLeft = model.locationToPoint(new DoublePoint(station.getX() - 0.4d, station.getY() - 0.4d));
             g2d.drawImage(station.getIcon(), stationIconTopLeft.x, stationIconTopLeft.y, (int) Math.round(0.8d * model.gridSize), (int) Math.round(0.8d * model.gridSize), null);
         }
     }
 
     private void drawStationSelection(Graphics2D g2d) {
         if (model.isLocationSelected()) {
-            Point stationSelectionTopLeft = model.locationToPoint(new Point(model.selectedLocation.x - 3, model.selectedLocation.y - 3));
+            Point stationSelectionTopLeft = model.locationToPoint(new IntPoint(model.selectedLocation.x - 3, model.selectedLocation.y - 3));
             g2d.drawImage(stationSelectionImage, stationSelectionTopLeft.x, stationSelectionTopLeft.y, 6 * model.gridSize, 6 * model.gridSize, null);
 
             if (!model.isStationSelected()) {

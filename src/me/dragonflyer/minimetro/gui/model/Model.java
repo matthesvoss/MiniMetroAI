@@ -3,6 +3,8 @@ package me.dragonflyer.minimetro.gui.model;
 import me.dragonflyer.minimetro.gui.model.entities.Line;
 import me.dragonflyer.minimetro.gui.model.entities.Station;
 import me.dragonflyer.minimetro.gui.model.exceptions.NoFreePlatformException;
+import me.dragonflyer.minimetro.gui.model.geom.DoublePoint;
+import me.dragonflyer.minimetro.gui.model.geom.IntPoint;
 import me.dragonflyer.minimetro.gui.view.View;
 
 import java.awt.*;
@@ -33,12 +35,12 @@ public class Model {
 
     public int gridSize = 39;
     public int gridWidth = 44, gridHeight = 26;// 48x30 3 gleise pro ausgang, 8 ausgänge, ubersprungene stationen kennzeichnen
-    private Point2D.Double center = new Point2D.Double(22, 13);
+    private DoublePoint center = new DoublePoint(22, 13);
     private double border = 3d;
 
     private boolean locationSelected = false, stationSelected = false;
-    private Point clickedLocation; //TODO: create location class
-    public Point selectedLocation;
+    private IntPoint clickedLocation;
+    public IntPoint selectedLocation;
     private Station selectedStation;
 
     private Point lastDragPoint;
@@ -240,9 +242,9 @@ public class Model {
 //        lines.add(connectingLine);
 
         stations.clear();
-        Station s1 = new Station(1, new Point(0, 0), Station.Type.CIRCLE);
-        Station s2 = new Station(2, new Point(4, 2), Station.Type.CROSS);
-        Station s3 = new Station(3, new Point(3, 4), Station.Type.STAR);
+        Station s1 = new Station(1, new IntPoint(0, 0), Station.Type.CIRCLE);
+        Station s2 = new Station(2, new IntPoint(4, 2), Station.Type.CROSS);
+        Station s3 = new Station(3, new IntPoint(3, 4), Station.Type.STAR);
         stations.add(s1);
         stations.add(s2);
         stations.add(s3);
@@ -345,11 +347,7 @@ public class Model {
                 selectedLocation = clickedLocation;
 
                 selectedStation = getStationOnLocation(selectedLocation);
-                if (selectedStation == null) {
-                    stationSelected = false;
-                } else {
-                    stationSelected = true;
-                }
+                stationSelected = selectedStation != null;
 
                 view.repaint();
             } else if (button == MouseEvent.BUTTON3) { // try to remove station
@@ -362,18 +360,18 @@ public class Model {
         }
     }
 
-    private Point getClosestLocation(Point point) {
-        Point2D.Double loc = pointToLocation(point);
-        return new Point((int) Math.round(loc.x), (int) Math.round(loc.y));
+    private IntPoint getClosestLocation(Point point) {
+        DoublePoint loc = pointToLocation(point);
+        return new IntPoint((int) Math.round(loc.x), (int) Math.round(loc.y));
     }
 
-    private boolean isLocationFree(Point p) {
+    private boolean isLocationFree(IntPoint p) {
         for (int x = -2; x <= 2; x++) {
             for (int y = -2; y <= 2; y++) {
                 if ((x == 0 && y == 0) || (x != 0 && y == -2) || (x == 2 && y != 0) || (x != 0 && y == 2) || (x == -2 && y != 0)) {
                     continue;
                 }
-                if (isStationOnLocation(new Point(p.x + x, p.y + y))) {
+                if (isStationOnLocation(new IntPoint(p.x + x, p.y + y))) {
                     return false;
                 }
             }
@@ -381,11 +379,11 @@ public class Model {
         return true;
     }
 
-    private boolean isStationOnLocation(Point p) {
+    private boolean isStationOnLocation(IntPoint p) {
         return getStationOnLocation(p) != null;
     }
 
-    private Station getStationOnLocation(Point p) {
+    private Station getStationOnLocation(IntPoint p) {
         for (Station station : stations) {
             if (station.getLocation().equals(p)) {
                 return station;
@@ -461,20 +459,16 @@ public class Model {
         center.setLocation(center.x + centerMoveX, center.y + centerMoveY);
     }
 
-    public Point locationToPoint(Point loc) {
-        return locationToPoint(new Point2D.Double(loc.x, loc.y));
-    }
-
-    public Point locationToPoint(Point2D.Double loc) {
-        double x = width / 2d + (loc.x - center.x) * gridSize;
-        double y = height / 2d + (loc.y - center.y) * gridSize;
+    public Point locationToPoint(me.dragonflyer.minimetro.gui.model.geom.Point loc) {
+        double x = width / 2d + (loc.getX() - center.x) * gridSize;
+        double y = height / 2d + (loc.getY() - center.y) * gridSize;
         return new Point((int) Math.round(x), (int) Math.round(y));
     }
 
-    private Point2D.Double pointToLocation(Point p) {
+    private DoublePoint pointToLocation(Point p) {
         double x = center.x + (p.x - width / 2d) / gridSize;
         double y = center.y + (p.y - height / 2d) / gridSize;
-        return new Point2D.Double(x, y);
+        return new DoublePoint(x, y);
     }
 
     public void frameResized(int width, int height) {
@@ -511,11 +505,11 @@ public class Model {
         center.setLocation(clampedX, clampedY);
     }
 
-    private int clamp(int x, int min, int max) {
-        return Math.max(min, Math.min(x, max));
+    private int clamp(int i, int min, int max) {
+        return Math.max(min, Math.min(i, max));
     }
 
-    private double clamp(double x, double min, double max) {
-        return Math.max(min, Math.min(x, max));
+    private double clamp(double d, double min, double max) {
+        return Math.max(min, Math.min(d, max));
     }
 }

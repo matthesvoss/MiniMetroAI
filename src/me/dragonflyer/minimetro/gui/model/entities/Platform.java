@@ -1,12 +1,12 @@
 package me.dragonflyer.minimetro.gui.model.entities;
 
-import java.awt.geom.Point2D;
+import me.dragonflyer.minimetro.gui.model.geom.DoublePoint;
 
 public class Platform {
 
     private Direction dir;
     private Lane lane;
-    private boolean used = false;
+    private boolean free = true;
 
     Platform(Direction dir, Lane lane) {
         this.dir = dir;
@@ -21,16 +21,16 @@ public class Platform {
         this.lane = lane;
     }
 
-    public boolean isUsed() {
-        return used;
+    public boolean isFree() {
+        return free;
     }
 
-    public void setUsed(boolean used) {
-        this.used = used;
+    public void setFree(boolean free) {
+        this.free = free;
     }
 
-    public Point2D.Double getPlatformOffset(double lineWidth) {
-        Point2D.Double offset = new Point2D.Double();
+    public DoublePoint getPlatformOffset(double lineWidth) {
+        DoublePoint offset = new DoublePoint();
         if (this.lane == Lane.LEFT) {
             offset = getPlatformOffsetLeft(lineWidth);
         } else if (this.lane == Lane.RIGHT) {
@@ -39,11 +39,11 @@ public class Platform {
         return offset;
     }
 
-    private Point2D.Double getPlatformOffsetLeft(double lineWidth) {
+    private DoublePoint getPlatformOffsetLeft(double lineWidth) {
         double straightOffset = lineWidth;
         double diagonalOffset = lineWidth / Math.sqrt(2d);
 
-        Point2D.Double offset = new Point2D.Double();
+        DoublePoint offset = new DoublePoint();
         switch (dir) {
             case N:
                 offset.x = -straightOffset;
@@ -79,15 +79,15 @@ public class Platform {
         return offset;
     }
 
-    private Point2D.Double getPlatformOffsetRight(double lineWidth) {
-        Point2D.Double offset = getPlatformOffsetLeft(lineWidth);
+    private DoublePoint getPlatformOffsetRight(double lineWidth) {
+        DoublePoint offset = getPlatformOffsetLeft(lineWidth);
         offset.x = -offset.x;
         offset.y = -offset.y;
         return offset;
     }
 
-    public Point2D.Double getInflectionOffset(double lineWidth, double absXDiff, double absYDiff, LineSection.Turn turn) {
-        Point2D.Double offset = new Point2D.Double();
+    public DoublePoint getInflectionOffset(double lineWidth, double absXDiff, double absYDiff, LineSection.Turn turn) {
+        DoublePoint offset = new DoublePoint();
         if (this.lane == Lane.LEFT) {
             offset = getInflectionOffsetLeft(lineWidth, absXDiff, absYDiff, turn);
         } else if (this.lane == Lane.RIGHT) {
@@ -96,11 +96,11 @@ public class Platform {
         return offset;
     }
 
-    private Point2D.Double getInflectionOffsetLeft(double lineWidth, double absXDiff, double absYDiff, LineSection.Turn turn) {
+    private DoublePoint getInflectionOffsetLeft(double lineWidth, double absXDiff, double absYDiff, LineSection.Turn turn) {
         double straightOffset = lineWidth;
         double diagonalOffset = lineWidth * Math.sqrt(2d);
 
-        Point2D.Double offset = new Point2D.Double();
+        DoublePoint offset = new DoublePoint();
         if (dir.isOrdinal()) {
             if (absXDiff < absYDiff) {
                 if (dir == Direction.SW || dir == Direction.NW) {
@@ -130,7 +130,6 @@ public class Platform {
 //
 //                }
 //            }
-            //TODO pass turn to linesection, call this method with turn from pov of platform (use opposite)
 
             if (absXDiff < absYDiff) {
                 if (dir == Direction.N) {
@@ -173,8 +172,8 @@ public class Platform {
         return offset;
     }
 
-    private Point2D.Double getInflectionOffsetRight(double lineWidth, double absXDiff, double absYDiff, LineSection.Turn turn) {
-        Point2D.Double offset = getInflectionOffsetLeft(lineWidth, absXDiff, absYDiff, turn);
+    private DoublePoint getInflectionOffsetRight(double lineWidth, double absXDiff, double absYDiff, LineSection.Turn turn) {
+        DoublePoint offset = getInflectionOffsetLeft(lineWidth, absXDiff, absYDiff, turn);
         offset.x = -offset.x;
         offset.y = -offset.y;
         return offset;

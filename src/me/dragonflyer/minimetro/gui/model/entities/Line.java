@@ -1,6 +1,7 @@
 package me.dragonflyer.minimetro.gui.model.entities;
 
 import me.dragonflyer.minimetro.gui.model.exceptions.NoFreePlatformException;
+import me.dragonflyer.minimetro.gui.model.geom.IntPoint;
 
 import java.awt.*;
 
@@ -35,15 +36,15 @@ public class Line {
 
             if (x1 == x2) { // stations are on same vertical line
                 if (y1 < y2) { // station1 is above station2
-                    setupLineSection(lineSection, Direction.S, Direction.N, null);
+                    setupLineSection(lineSection, Direction.S, Direction.N, null, null);
                 } else { // station1 is below station2
-                    setupLineSection(lineSection, Direction.N, Direction.S, null);
+                    setupLineSection(lineSection, Direction.N, Direction.S, null, null);
                 }
             } else if (y1 == y2) { // stations are on same horizontal line
                 if (x1 < x2) { // station1 is left of station2
-                    setupLineSection(lineSection, Direction.E, Direction.W, null);
+                    setupLineSection(lineSection, Direction.E, Direction.W, null, null);
                 } else { // station1 is right of station2
-                    setupLineSection(lineSection, Direction.W, Direction.E, null);
+                    setupLineSection(lineSection, Direction.W, Direction.E, null, null);
                 }
             } else {
                 if (absXDiff == absYDiff) { // no inflection point needed
@@ -66,7 +67,7 @@ public class Line {
                         }
                     }
 
-                    setupLineSection(lineSection, station1Dir, station2Dir, null);
+                    setupLineSection(lineSection, station1Dir, station2Dir, null, null);
                 } else { // inflection point needed
                     int diagonalLength = Math.min(absXDiff, absYDiff);
 
@@ -74,29 +75,29 @@ public class Line {
                         if (xDiff > 0) {
                             if (yDiff < 0) {
                                 try {
-                                    setupLineSection(lineSection, Direction.N, Direction.SW, new Point(x1, y2 + diagonalLength));//l -sx -dy r +sx +dy
+                                    setupLineSection(lineSection, Direction.N, Direction.SW, new IntPoint(x1, y2 + diagonalLength), LineSection.Turn.RIGHT);
                                 } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.NE, Direction.S, new Point(x2, y1 - diagonalLength));//l -sx -dy r +sx +dy
+                                    setupLineSection(lineSection, Direction.NE, Direction.S, new IntPoint(x2, y1 - diagonalLength), LineSection.Turn.LEFT);
                                 }
                             } else {
                                 try {
-                                    setupLineSection(lineSection, Direction.SE, Direction.N, new Point(x2, y1 + diagonalLength));//l +sx -dy r -sx +dy
+                                    setupLineSection(lineSection, Direction.SE, Direction.N, new IntPoint(x2, y1 + diagonalLength), LineSection.Turn.RIGHT);
                                 } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.S, Direction.NW, new Point(x1, y2 - diagonalLength));//l +sx -dy r -sx +dy
+                                    setupLineSection(lineSection, Direction.S, Direction.NW, new IntPoint(x1, y2 - diagonalLength), LineSection.Turn.LEFT);
                                 }
                             }
                         } else {
                             if (yDiff > 0) {
                                 try {
-                                    setupLineSection(lineSection, Direction.S, Direction.NE, new Point(x1, y2 - diagonalLength));//l +sx +dy r -sx -dy
+                                    setupLineSection(lineSection, Direction.S, Direction.NE, new IntPoint(x1, y2 - diagonalLength), LineSection.Turn.RIGHT);
                                 } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.SW, Direction.N, new Point(x2, y1 + diagonalLength));
+                                    setupLineSection(lineSection, Direction.SW, Direction.N, new IntPoint(x2, y1 + diagonalLength), LineSection.Turn.LEFT);
                                 }
                             } else {
                                 try {
-                                    setupLineSection(lineSection, Direction.NW, Direction.S, new Point(x2, y1 - diagonalLength));//l -sx +dy r +sx -dy
+                                    setupLineSection(lineSection, Direction.NW, Direction.S, new IntPoint(x2, y1 - diagonalLength), LineSection.Turn.RIGHT);
                                 } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.N, Direction.SE, new Point(x1, y2 + diagonalLength));
+                                    setupLineSection(lineSection, Direction.N, Direction.SE, new IntPoint(x1, y2 + diagonalLength), LineSection.Turn.LEFT);
                                 }
                             }
                         }
@@ -104,29 +105,29 @@ public class Line {
                         if (xDiff > 0) {
                             if (yDiff < 0) {
                                 try {
-                                    setupLineSection(lineSection, Direction.NE, Direction.W, new Point(x1 + diagonalLength, y2));//l -dx -sy r +dx +sy
+                                    setupLineSection(lineSection, Direction.NE, Direction.W, new IntPoint(x1 + diagonalLength, y2), LineSection.Turn.RIGHT);
                                 } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.E, Direction.SW, new Point(x2 - diagonalLength, y1));
+                                    setupLineSection(lineSection, Direction.E, Direction.SW, new IntPoint(x2 - diagonalLength, y1), LineSection.Turn.LEFT);
                                 }
                             } else {
                                 try {
-                                    setupLineSection(lineSection, Direction.E, Direction.NW, new Point(x2 - diagonalLength, y1));//l +dx -sy r -dx +sy
+                                    setupLineSection(lineSection, Direction.E, Direction.NW, new IntPoint(x2 - diagonalLength, y1), LineSection.Turn.RIGHT);
                                 } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.SE, Direction.W, new Point(x1 + diagonalLength, y2));
+                                    setupLineSection(lineSection, Direction.SE, Direction.W, new IntPoint(x1 + diagonalLength, y2), LineSection.Turn.LEFT);
                                 }
                             }
                         } else {
                             if (yDiff > 0) {
                                 try {
-                                    setupLineSection(lineSection, Direction.SW, Direction.E, new Point(x1 - diagonalLength, y2));//l +dx +sy r -dx -sy
+                                    setupLineSection(lineSection, Direction.SW, Direction.E, new IntPoint(x1 - diagonalLength, y2), LineSection.Turn.RIGHT);
                                 } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.W, Direction.NE, new Point(x2 + diagonalLength, y1));
+                                    setupLineSection(lineSection, Direction.W, Direction.NE, new IntPoint(x2 + diagonalLength, y1), LineSection.Turn.LEFT);
                                 }
                             } else {
                                 try {
-                                    setupLineSection(lineSection, Direction.W, Direction.SE, new Point(x2 + diagonalLength, y1));//l -dx +sy r +dx -sy
+                                    setupLineSection(lineSection, Direction.W, Direction.SE, new IntPoint(x2 + diagonalLength, y1), LineSection.Turn.RIGHT);
                                 } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.NW, Direction.E, new Point(x1 - diagonalLength, y2));
+                                    setupLineSection(lineSection, Direction.NW, Direction.E, new IntPoint(x1 - diagonalLength, y2), LineSection.Turn.LEFT);
                                 }
                             }
                         }
@@ -137,25 +138,33 @@ public class Line {
         }
     }
 
-    private void setupLineSection(LineSection lineSection, Direction platform1Dir, Direction platform2Dir, Point inflectionLoc) throws NoFreePlatformException {
+    private void setupLineSection(LineSection lineSection, Direction platform1Dir, Direction platform2Dir, IntPoint inflectionLoc, LineSection.Turn turn) throws NoFreePlatformException {
         PlatformDirection platformDir1 = lineSection.getStation1().getPlatformDirection(platform1Dir);
         PlatformDirection platformDir2 = lineSection.getStation2().getPlatformDirection(platform2Dir);
 
         boolean hasInflectionLoc = inflectionLoc != null;
         Platform platform1 = platformDir1.getFreePlatform();
-        Platform platform2 = hasInflectionLoc ? platformDir2.getFreePlatform() : platformDir2.getOppositePlatform(platform1);
+        Platform platform2 = platformDir2.getOppositePlatform(platform1);
+        if (platform2 == null) {
+            if (hasInflectionLoc) {
+                platform2 = platformDir2.getFreePlatform();
+            } else {
+                throw new NoFreePlatformException();
+            }
+        }
 
         lineSection.setPlatform1(platform1);
-        platform1.setUsed(true);
+        platform1.setFree(false);
 
         lineSection.setPlatform2(platform2);
-        platform2.setUsed(true);
+        platform2.setFree(false);
 
         lineSection.setPlatform1Dir(platform1Dir);
         lineSection.setPlatform2Dir(platform2Dir);
 
         if (hasInflectionLoc) {
             lineSection.setInflectionLoc(inflectionLoc);
+            lineSection.setTurn(turn);
         }
 
         lineSection.applyOffsets();

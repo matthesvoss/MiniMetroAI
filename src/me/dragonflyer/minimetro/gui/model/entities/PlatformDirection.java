@@ -15,39 +15,39 @@ public class PlatformDirection {
     }
 
     public Platform getFreePlatform() throws NoFreePlatformException {
-        if (!middlePlatform.isUsed()) {
+        if (middlePlatform.isFree()) {
             return middlePlatform;
         }
-        if (!leftPlatform.isUsed()) {
+        if (leftPlatform.isFree()) {
             return leftPlatform;
         }
-        if (!rightPlatform.isUsed()) {
+        if (rightPlatform.isFree()) {
             return rightPlatform;
         }
         throw new NoFreePlatformException();
     }
 
-    public Platform getOppositePlatform(Platform platform) throws NoFreePlatformException {
+    public Platform getOppositePlatform(Platform platform) {
         switch (platform.getLane()) {
             case LEFT:
-                if (!rightPlatform.isUsed()) {
+                if (rightPlatform.isFree()) {
                     return rightPlatform;
                 }
                 break;
             case MIDDLE:
-                if (!middlePlatform.isUsed()) {
+                if (middlePlatform.isFree()) {
                     return middlePlatform;
                 }
                 break;
             case RIGHT:
-                if (!leftPlatform.isUsed()) {
+                if (leftPlatform.isFree()) {
                     return leftPlatform;
                 }
                 break;
             default:
                 break;
         }
-        throw new NoFreePlatformException();
+        return null;
     }
 
 }

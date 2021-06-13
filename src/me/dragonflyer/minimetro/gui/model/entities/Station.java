@@ -1,5 +1,6 @@
 package me.dragonflyer.minimetro.gui.model.entities;
 
+import me.dragonflyer.minimetro.gui.model.geom.IntPoint;
 import me.dragonflyer.minimetro.resources.ResourceManager;
 
 import java.awt.*;
@@ -8,17 +9,17 @@ import java.awt.geom.Point2D;
 public class Station {
 
     public int id;
-    private Point loc;
+    private IntPoint loc;
     private Type type;
     private Image icon;
     private PlatformDirection[] platforms = new PlatformDirection[8];
 
-    public Station(int id, Point loc, Type type) {
+    public Station(int id, IntPoint loc, Type type) {
         this(loc, type);
         this.id = id;
     }
 
-    public Station(Point loc, Type type) {
+    public Station(IntPoint loc, Type type) {
         this.loc = loc;
         setType(type);
 
@@ -36,7 +37,7 @@ public class Station {
         return id;
     }
 
-    public Point getLocation() {
+    public IntPoint getLocation() {
         return loc;
     }
 
@@ -63,8 +64,7 @@ public class Station {
 
     private void updateIcon() {
         ResourceManager resourceManager = ResourceManager.getInstance();
-        Image icon = resourceManager.getImage(type.getName());
-        this.icon = icon;
+        this.icon = resourceManager.getImage(type.getName());
     }
 
     public PlatformDirection getPlatformDirection(Direction dir) {
