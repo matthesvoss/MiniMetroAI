@@ -1,10 +1,8 @@
 plugins {
+    id 'idea'
     id 'java'
     id 'application'
 }
-
-sourceCompatibility = '11'
-targetCompatibility = '11'
 
 group 'org.example'
 version '1.0-SNAPSHOT'
@@ -18,6 +16,12 @@ dependencies {
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
 application {
-    mainClass = 'me.dragonflyer.minimetro.Main'
+    mainClassName = 'me.dragonflyer.minimetro.Main'
 }
