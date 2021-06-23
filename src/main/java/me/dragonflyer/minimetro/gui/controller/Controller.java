@@ -24,7 +24,7 @@ public class Controller {
     public void startUp() {
         view = new View(this, model);
         model.registerView(view);
-        view.createAndShow();
+        SwingUtilities.invokeLater(() -> view.createAndShow());
     }
 
     public void numberOfLinesChanged(int numberOfLines) {
@@ -40,14 +40,21 @@ public class Controller {
     }
 
     public void goButtonClicked() {
-        if (model.getStations().size() < 2) {
-            return;
-        }
+        //TODO remove comment
+//        if (model.getStations().size() < 2) {
+//            return;
+//        }
 
-        Problem problem = new Problem(model.getStations(), model.getNumberOfLines(), model.getNumberOfCarriages(), model.getNumberOfTunnels());
-        Solution solution = solver.solve(problem);
-        model.setLines(solution.getLines());
-        view.repaint();
+        new Thread(() -> {
+            SwingUtilities.invokeLater(() -> view.toggleGoButton());
+            Problem problem = new Problem(model.getStations(), model.getNumberOfLines(), model.getNumberOfCarriages(), model.getNumberOfTunnels());
+            Solution solution = solver.solve(problem);
+            model.setLines(solution.getLines());
+            SwingUtilities.invokeLater(() -> {
+                view.toggleGoButton();
+                view.repaint();
+            });
+        }).start();
     }
 
     public void mouseClicked(MouseEvent e) {

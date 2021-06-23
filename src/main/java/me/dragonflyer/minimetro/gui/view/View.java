@@ -19,8 +19,8 @@ public class View extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
-    private Controller controller;
-    private Model model;
+    private final Controller controller;
+    private final Model model;
 
     private JFrame frame;
     private JLabel linesLabel, carriagesLabel, tunnelsLabel; // TODO make own jpanel, remove resize listener, add solver selection
@@ -164,6 +164,10 @@ public class View extends JPanel {
         stationSelectionImage = resourceManager.getImage("stationselection");
     }
 
+    public void toggleGoButton() {
+        goButton.setEnabled(!goButton.isEnabled());
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -248,5 +252,4 @@ public class View extends JPanel {
     private void fillCircle(Graphics2D g2d, int x, int y, int radius) {
         g2d.fillOval(x - radius, y - radius, 2 * radius, 2 * radius);
     }
-
 }
