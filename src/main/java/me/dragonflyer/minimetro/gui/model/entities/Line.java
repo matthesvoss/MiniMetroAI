@@ -39,7 +39,7 @@ public class Line {
                     setupLineSection(lineSection, Direction.W, Direction.E, null, null);
                 }
             } else {
-                if (absXDiff == absYDiff) { // no inflection point needed
+                if (absXDiff == absYDiff) { // no inflection point needed (diagonal)
                     Direction station1Dir, station2Dir;
                     if (xDiff > 0) {
                         if (yDiff < 0) {

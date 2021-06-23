@@ -6,7 +6,7 @@ import java.awt.event.MouseWheelEvent;
 
 public class MouseEventListener extends MouseAdapter {
 
-    private Controller controller;
+    private final Controller controller;
 
     public MouseEventListener(Controller controller) {
         this.controller = controller;

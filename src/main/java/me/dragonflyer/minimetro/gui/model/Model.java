@@ -17,7 +17,7 @@ public class Model {
     private int width, height;
 
     private List<Station> stations = new ArrayList<>();
-    private int numberOfLines, numberOfCarriages, numberOfTunnels;
+    private int numberOfLines = 1, numberOfCarriages = 1, numberOfTunnels = 1;
     private List<Line> lines = new ArrayList<>();
     public final Color[] lineColors = new Color[] {
             new Color(225, 23, 30),
@@ -134,13 +134,13 @@ public class Model {
         return new IntPoint((int) Math.round(loc.x), (int) Math.round(loc.y));
     }
 
-    private boolean isLocationFree(IntPoint p) {
+    private boolean isLocationFree(IntPoint loc) { //TODO use radius of 2
         for (int x = -2; x <= 2; x++) {
             for (int y = -2; y <= 2; y++) {
                 if ((x == 0 && y == 0) || (x != 0 && y == -2) || (x == 2 && y != 0) || (x != 0 && y == 2) || (x == -2 && y != 0)) {
                     continue;
                 }
-                if (isStationOnLocation(new IntPoint(p.x + x, p.y + y))) {
+                if (isStationOnLocation(new IntPoint(loc).translate(x, y))) {
                     return false;
                 }
             }
@@ -148,17 +148,15 @@ public class Model {
         return true;
     }
 
-    private boolean isStationOnLocation(IntPoint p) {
-        return getStationOnLocation(p) != null;
+    private boolean isStationOnLocation(IntPoint loc) {
+        return getStationOnLocation(loc) != null;
     }
 
-    private Station getStationOnLocation(IntPoint p) {
-        for (Station station : stations) {
-            if (station.getLocation().equals(p)) {
-                return station;
-            }
-        }
-        return null;
+    private Station getStationOnLocation(IntPoint loc) {
+        return stations.stream()
+                .filter(station -> station.getLocation().equals(loc))
+                .findAny()
+                .orElse(null);
     }
 
     private Station.Type getStationTypeForDegree(double degree) {
@@ -219,11 +217,11 @@ public class Model {
     }
 
     private void zoomInOnCursor(Point point, int prevGridSize) {
-        double centerDiffX = point.x - width / 2d;
-        double centerDiffY = point.y - height / 2d;
+        double centerXDiff = point.x - width / 2d;
+        double centerYDiff = point.y - height / 2d;
 
-        double centerMoveX = centerDiffX / prevGridSize - centerDiffX / gridSize;
-        double centerMoveY = centerDiffY / prevGridSize - centerDiffY / gridSize;
+        double centerMoveX = centerXDiff / prevGridSize - centerXDiff / gridSize;
+        double centerMoveY = centerYDiff / prevGridSize - centerYDiff / gridSize;
 
         center.setLocation(center.x + centerMoveX, center.y + centerMoveY);
     }

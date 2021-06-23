@@ -55,8 +55,7 @@ public class LineSection {
         DoublePoint inflectionOffset1 = platform1.getInflectionOffset(lineWidth, absXDiff, absYDiff, turn);
         DoublePoint inflectionOffset2 = platform2.getInflectionOffset(lineWidth, absXDiff, absYDiff, turn.getOpposite());
 
-        inflectionOffset1.translate(inflectionOffset2);
-        inflectionLoc.translate(inflectionOffset1);
+        inflectionLoc.translate(inflectionOffset1).translate(inflectionOffset2);
     }
 
     public Station getStation1() {
