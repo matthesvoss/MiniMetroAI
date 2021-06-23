@@ -17,28 +17,33 @@ public class DoublePoint extends Point {
         this.y = y;
     }
 
+    @Override
     public double getX() {
         return x;
     }
 
+    @Override
     public double getY() {
         return y;
     }
 
-    public void setLocation(double x, double y) {
+    public DoublePoint setLocation(double x, double y) {
         this.x = x;
         this.y = y;
+        return this;
     }
 
-    public void translate(double dx, double dy) {
+    public DoublePoint translate(double dx, double dy) {
         this.x += dx;
         this.y += dy;
+        return this;
     }
 
-    public void translate(DoublePoint d) {
-        translate(d.x, d.y);
+    public DoublePoint translate(DoublePoint d) {
+        return translate(d.x, d.y);
     }
 
+    @Override
     public String toString() {
         return "[" + x + ", " + y + "]";
     }

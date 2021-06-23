@@ -17,29 +17,35 @@ public class IntPoint extends Point {
         this.y = y;
     }
 
+    @Override
     public double getX() {
         return x;
     }
 
+    @Override
     public double getY() {
         return y;
     }
 
-    public void setLocation(int x, int y) {
+    public IntPoint setLocation(int x, int y) {
         this.x = x;
         this.y = y;
+        return this;
     }
 
-    public void translate(int dx, int dy) {
+    public IntPoint translate(int dx, int dy) {
         this.x += dx;
         this.y += dy;
+        return this;
     }
 
-    public void translate(IntPoint d) {
-        translate(d.x, d.y);
+    public IntPoint translate(IntPoint d) {
+        return translate(d.x, d.y);
     }
 
+    @Override
     public String toString() {
         return "[" + x + ", " + y + "]";
     }
+
 }
