@@ -5,10 +5,13 @@ import me.dragonflyer.minimetro.gui.model.exceptions.NoFreePlatformException;
 import me.dragonflyer.minimetro.gui.model.geometry.IntPoint;
 
 import java.awt.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class Line {
 
-    private Station[] stations;
+    private Station[] stations; //TODO use lists, add appendStation method
     private LineSection[] lineSections;
     private Color color;
 
@@ -197,41 +200,33 @@ public class Line {
         return stations[stations.length - 1];
     }
 
-//    @Override
-//    public int hashCode() {
-//        final int prime = 31;
-//        int result = 1;
-//        Station[] stationsReversed = Arrays.copyOf(stations, stations.length);
-//        for (int i = 0; i < stationsReversed.length / 2; i++) {
-//            Station temp = stationsReversed[i];
-//            int index = stationsReversed.length - i - 1;
-//            stationsReversed[i] = stationsReversed[index];
-//            stationsReversed[index] = temp;
-//        }
-//        result = prime * result + Arrays.hashCode(stations) + Arrays.hashCode(stationsReversed);
-//        return result;
-//    }
-//
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (this == obj) {
-//            return true;
-//        }
-//        if (!(obj instanceof Line)) {
-//            return false;
-//        }
-//        Line other = (Line) obj;
-//        Station[] stationsReversed = Arrays.copyOf(stations, stations.length);
-//        for (int i = 0; i < stationsReversed.length / 2; i++) {
-//            Station temp = stationsReversed[i];
-//            int index = stationsReversed.length - i - 1;
-//            stationsReversed[i] = stationsReversed[index];
-//            stationsReversed[index] = temp;
-//        }
-//        if (!(Arrays.equals(stations, other.stations) || Arrays.equals(stationsReversed, other.stations))) {
-//            return false;
-//        }
-//        return true;
-//    }
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        List<Station> stationListReversed = Arrays.asList(stations.clone());
+        Collections.reverse(stationListReversed);
+        result = prime * result + Arrays.hashCode(stations) + Arrays.hashCode(stationListReversed.toArray());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Line)) {
+            return false;
+        }
+        Line other = (Line) obj;
+        List<Station> stationList = Arrays.asList(stations);
+        List<Station> otherStationList = Arrays.asList(other.stations);
+        if (otherStationList.equals(stationList)) {
+            return true;
+        }
+        List<Station> stationListReversed = Arrays.asList(stations.clone());
+        Collections.reverse(stationListReversed);
+        return otherStationList.equals(stationListReversed);
+    }
 
 }
