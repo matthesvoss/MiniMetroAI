@@ -1,5 +1,7 @@
 package me.dragonflyer.minimetro.gui.model.geometry;
 
+import java.util.Objects;
+
 public class IntPoint extends Point {
 
     public int x, y;
@@ -41,6 +43,23 @@ public class IntPoint extends Point {
 
     public IntPoint translate(IntPoint d) {
         return translate(d.x, d.y);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        IntPoint other = (IntPoint) o;
+        return x == other.x && y == other.y;
     }
 
     @Override

@@ -85,30 +85,21 @@ public class Station {
         }
     }
 
-    //    @Override
-//    public int hashCode() {
-//        final int prime = 31;
-//        int result = 1;
-//        result = prime * result + test/* (location == null ? 0 : location.hashCode()) */;
-//        return result;
-//    }
-//
-//    @Override
-//    public boolean equals(Object other) {
-//        if (this == other) {
-//            return true;
-//        }
-//        if (!(other instanceof Station)) {
-//            return false;
-//        }
-//        Station otherStation = (Station) other;
-//        if (test != otherStation.getTest()/*
-//         * location == null && otherStation.location != null ||
-//         * !location.equals(otherStation.location)
-//         */) {
-//            return false;
-//        }
-//        return true;
-//    }
+    @Override
+    public int hashCode() {
+        return loc.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Station other = (Station) o;
+        return other.getLocation().equals(this.loc);
+    }
 
 }
