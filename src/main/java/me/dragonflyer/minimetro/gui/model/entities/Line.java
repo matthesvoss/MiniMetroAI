@@ -3,134 +3,143 @@ package me.dragonflyer.minimetro.gui.model.entities;
 import me.dragonflyer.minimetro.gui.model.enums.Direction;
 import me.dragonflyer.minimetro.gui.model.exceptions.NoFreePlatformException;
 import me.dragonflyer.minimetro.gui.model.geometry.IntPoint;
+import org.checkerframework.checker.units.qual.A;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Line {
 
-    private Station[] stations; //TODO use lists, add appendStation method
-    private LineSection[] lineSections;
+    private List<Station> stations;
+    private List<LineSection> lineSections;
     private Color color;
 
-    public Line(Station[] stations) {
+    public Line(List<Station> stations) {
+        if (stations == null || stations.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
         this.stations = stations;
-        this.lineSections = new LineSection[stations.length - 1];
+        this.lineSections = new ArrayList<>();
     }
 
     public void calculateLineSections() throws NoFreePlatformException {
-        for (int i = 0; i < stations.length - 1; i++) {
-            Station station1 = stations[i], station2 = stations[i + 1];
-            int x1 = station1.getX(), y1 = station1.getY(), x2 = station2.getX(), y2 = station2.getY();
-            int xDiff = x2 - x1, yDiff = y2 - y1;
-            int absXDiff = Math.abs(xDiff), absYDiff = Math.abs(yDiff);
+        for (int i = 0; i < stations.size() - 1; i++) {
+            calculateLineSection(stations.get(i), stations.get(i + 1));
+        }
+    }
 
-            LineSection lineSection = new LineSection(this, station1, station2, absXDiff, absYDiff);
+    protected void calculateLineSection(Station station1, Station station2) throws NoFreePlatformException {
+        int x1 = station1.getX(), y1 = station1.getY(), x2 = station2.getX(), y2 = station2.getY();
+        int xDiff = x2 - x1, yDiff = y2 - y1;
+        int absXDiff = Math.abs(xDiff), absYDiff = Math.abs(yDiff);
 
-            if (x1 == x2) { // stations are on same vertical line
-                if (y1 < y2) { // station1 is above station2
-                    setupLineSection(lineSection, Direction.S, Direction.N, null, null);
-                } else { // station1 is below station2
-                    setupLineSection(lineSection, Direction.N, Direction.S, null, null);
+        LineSection lineSection = new LineSection(this, station1, station2, absXDiff, absYDiff);
+
+        if (x1 == x2) { // stations are on same vertical line
+            if (y1 < y2) { // station1 is above station2
+                setupLineSection(lineSection, Direction.S, Direction.N, null, null);
+            } else { // station1 is below station2
+                setupLineSection(lineSection, Direction.N, Direction.S, null, null);
+            }
+        } else if (y1 == y2) { // stations are on same horizontal line
+            if (x1 < x2) { // station1 is left of station2
+                setupLineSection(lineSection, Direction.E, Direction.W, null, null);
+            } else { // station1 is right of station2
+                setupLineSection(lineSection, Direction.W, Direction.E, null, null);
+            }
+        } else {
+            if (absXDiff == absYDiff) { // no inflection point needed (diagonal)
+                Direction station1Dir, station2Dir;
+                if (xDiff > 0) {
+                    if (yDiff < 0) {
+                        station1Dir = Direction.NE;
+                        station2Dir = Direction.SW;
+                    } else {
+                        station1Dir = Direction.SE;
+                        station2Dir = Direction.NW;
+                    }
+                } else {
+                    if (yDiff > 0) {
+                        station1Dir = Direction.SW;
+                        station2Dir = Direction.NE;
+                    } else {
+                        station1Dir = Direction.NW;
+                        station2Dir = Direction.SE;
+                    }
                 }
-            } else if (y1 == y2) { // stations are on same horizontal line
-                if (x1 < x2) { // station1 is left of station2
-                    setupLineSection(lineSection, Direction.E, Direction.W, null, null);
-                } else { // station1 is right of station2
-                    setupLineSection(lineSection, Direction.W, Direction.E, null, null);
-                }
-            } else {
-                if (absXDiff == absYDiff) { // no inflection point needed (diagonal)
-                    Direction station1Dir, station2Dir;
+
+                setupLineSection(lineSection, station1Dir, station2Dir, null, null);
+            } else { // inflection point needed
+                int diagonalLength = Math.min(absXDiff, absYDiff);
+
+                if (absXDiff < absYDiff) {
                     if (xDiff > 0) {
                         if (yDiff < 0) {
-                            station1Dir = Direction.NE;
-                            station2Dir = Direction.SW;
+                            try {
+                                setupLineSection(lineSection, Direction.N, Direction.SW, new IntPoint(x1, y2 + diagonalLength), LineSection.Turn.RIGHT);
+                            } catch (NoFreePlatformException e) {
+                                setupLineSection(lineSection, Direction.NE, Direction.S, new IntPoint(x2, y1 - diagonalLength), LineSection.Turn.LEFT);
+                            }
                         } else {
-                            station1Dir = Direction.SE;
-                            station2Dir = Direction.NW;
+                            try {
+                                setupLineSection(lineSection, Direction.SE, Direction.N, new IntPoint(x2, y1 + diagonalLength), LineSection.Turn.RIGHT);
+                            } catch (NoFreePlatformException e) {
+                                setupLineSection(lineSection, Direction.S, Direction.NW, new IntPoint(x1, y2 - diagonalLength), LineSection.Turn.LEFT);
+                            }
                         }
                     } else {
                         if (yDiff > 0) {
-                            station1Dir = Direction.SW;
-                            station2Dir = Direction.NE;
-                        } else {
-                            station1Dir = Direction.NW;
-                            station2Dir = Direction.SE;
-                        }
-                    }
-
-                    setupLineSection(lineSection, station1Dir, station2Dir, null, null);
-                } else { // inflection point needed
-                    int diagonalLength = Math.min(absXDiff, absYDiff);
-
-                    if (absXDiff < absYDiff) {
-                        if (xDiff > 0) {
-                            if (yDiff < 0) {
-                                try {
-                                    setupLineSection(lineSection, Direction.N, Direction.SW, new IntPoint(x1, y2 + diagonalLength), LineSection.Turn.RIGHT);
-                                } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.NE, Direction.S, new IntPoint(x2, y1 - diagonalLength), LineSection.Turn.LEFT);
-                                }
-                            } else {
-                                try {
-                                    setupLineSection(lineSection, Direction.SE, Direction.N, new IntPoint(x2, y1 + diagonalLength), LineSection.Turn.RIGHT);
-                                } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.S, Direction.NW, new IntPoint(x1, y2 - diagonalLength), LineSection.Turn.LEFT);
-                                }
+                            try {
+                                setupLineSection(lineSection, Direction.S, Direction.NE, new IntPoint(x1, y2 - diagonalLength), LineSection.Turn.RIGHT);
+                            } catch (NoFreePlatformException e) {
+                                setupLineSection(lineSection, Direction.SW, Direction.N, new IntPoint(x2, y1 + diagonalLength), LineSection.Turn.LEFT);
                             }
                         } else {
-                            if (yDiff > 0) {
-                                try {
-                                    setupLineSection(lineSection, Direction.S, Direction.NE, new IntPoint(x1, y2 - diagonalLength), LineSection.Turn.RIGHT);
-                                } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.SW, Direction.N, new IntPoint(x2, y1 + diagonalLength), LineSection.Turn.LEFT);
-                                }
-                            } else {
-                                try {
-                                    setupLineSection(lineSection, Direction.NW, Direction.S, new IntPoint(x2, y1 - diagonalLength), LineSection.Turn.RIGHT);
-                                } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.N, Direction.SE, new IntPoint(x1, y2 + diagonalLength), LineSection.Turn.LEFT);
-                                }
+                            try {
+                                setupLineSection(lineSection, Direction.NW, Direction.S, new IntPoint(x2, y1 - diagonalLength), LineSection.Turn.RIGHT);
+                            } catch (NoFreePlatformException e) {
+                                setupLineSection(lineSection, Direction.N, Direction.SE, new IntPoint(x1, y2 + diagonalLength), LineSection.Turn.LEFT);
+                            }
+                        }
+                    }
+                } else {
+                    if (xDiff > 0) {
+                        if (yDiff < 0) {
+                            try {
+                                setupLineSection(lineSection, Direction.NE, Direction.W, new IntPoint(x1 + diagonalLength, y2), LineSection.Turn.RIGHT);
+                            } catch (NoFreePlatformException e) {
+                                setupLineSection(lineSection, Direction.E, Direction.SW, new IntPoint(x2 - diagonalLength, y1), LineSection.Turn.LEFT);
+                            }
+                        } else {
+                            try {
+                                setupLineSection(lineSection, Direction.E, Direction.NW, new IntPoint(x2 - diagonalLength, y1), LineSection.Turn.RIGHT);
+                            } catch (NoFreePlatformException e) {
+                                setupLineSection(lineSection, Direction.SE, Direction.W, new IntPoint(x1 + diagonalLength, y2), LineSection.Turn.LEFT);
                             }
                         }
                     } else {
-                        if (xDiff > 0) {
-                            if (yDiff < 0) {
-                                try {
-                                    setupLineSection(lineSection, Direction.NE, Direction.W, new IntPoint(x1 + diagonalLength, y2), LineSection.Turn.RIGHT);
-                                } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.E, Direction.SW, new IntPoint(x2 - diagonalLength, y1), LineSection.Turn.LEFT);
-                                }
-                            } else {
-                                try {
-                                    setupLineSection(lineSection, Direction.E, Direction.NW, new IntPoint(x2 - diagonalLength, y1), LineSection.Turn.RIGHT);
-                                } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.SE, Direction.W, new IntPoint(x1 + diagonalLength, y2), LineSection.Turn.LEFT);
-                                }
+                        if (yDiff > 0) {
+                            try {
+                                setupLineSection(lineSection, Direction.SW, Direction.E, new IntPoint(x1 - diagonalLength, y2), LineSection.Turn.RIGHT);
+                            } catch (NoFreePlatformException e) {
+                                setupLineSection(lineSection, Direction.W, Direction.NE, new IntPoint(x2 + diagonalLength, y1), LineSection.Turn.LEFT);
                             }
                         } else {
-                            if (yDiff > 0) {
-                                try {
-                                    setupLineSection(lineSection, Direction.SW, Direction.E, new IntPoint(x1 - diagonalLength, y2), LineSection.Turn.RIGHT);
-                                } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.W, Direction.NE, new IntPoint(x2 + diagonalLength, y1), LineSection.Turn.LEFT);
-                                }
-                            } else {
-                                try {
-                                    setupLineSection(lineSection, Direction.W, Direction.SE, new IntPoint(x2 + diagonalLength, y1), LineSection.Turn.RIGHT);
-                                } catch (NoFreePlatformException e) {
-                                    setupLineSection(lineSection, Direction.NW, Direction.E, new IntPoint(x1 - diagonalLength, y2), LineSection.Turn.LEFT);
-                                }
+                            try {
+                                setupLineSection(lineSection, Direction.W, Direction.SE, new IntPoint(x2 + diagonalLength, y1), LineSection.Turn.RIGHT);
+                            } catch (NoFreePlatformException e) {
+                                setupLineSection(lineSection, Direction.NW, Direction.E, new IntPoint(x1 - diagonalLength, y2), LineSection.Turn.LEFT);
                             }
                         }
                     }
                 }
             }
-            lineSections[i] = lineSection;
         }
+        lineSections.add(lineSection);
     }
 
     private void setupLineSection(LineSection lineSection, Direction platform1Dir, Direction platform2Dir, IntPoint inflectionLoc, LineSection.Turn turn) throws NoFreePlatformException {
@@ -172,15 +181,11 @@ public class Line {
         }
     }
 
-    public boolean isCircle() {
-        return getFirstStation().equals(getLastStation());
-    }
-
-    public Station[] getStations() {
+    public List<Station> getStations() {
         return stations;
     }
 
-    public LineSection[] getLineSections() {
+    public List<LineSection> getLineSections() {
         return lineSections;
     }
 
@@ -193,40 +198,38 @@ public class Line {
     }
 
     public Station getFirstStation() {
-        return stations[0];
+        return stations.get(0);
     }
 
     public Station getLastStation() {
-        return stations[stations.length - 1];
+        return stations.get(stations.size() - 1);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        List<Station> stationListReversed = Arrays.asList(stations.clone());
-        Collections.reverse(stationListReversed);
-        result = prime * result + Arrays.hashCode(stations) + Arrays.hashCode(stationListReversed.toArray());
+        List<Station> stationsReversed = new ArrayList<>(stations);
+        Collections.reverse(stationsReversed);
+        result = prime * result + stations.hashCode() + stationsReversed.hashCode();
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (!(obj instanceof Line)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Line other = (Line) obj;
-        List<Station> stationList = Arrays.asList(stations);
-        List<Station> otherStationList = Arrays.asList(other.stations);
-        if (otherStationList.equals(stationList)) {
+        Line other = (Line) o;
+        if (other.stations.equals(stations)) {
             return true;
         }
-        List<Station> stationListReversed = Arrays.asList(stations.clone());
-        Collections.reverse(stationListReversed);
-        return otherStationList.equals(stationListReversed);
+        List<Station> stationsReversed = new ArrayList<>(stations);
+        Collections.reverse(stationsReversed);
+        return other.stations.equals(stationsReversed);
     }
 
 }
