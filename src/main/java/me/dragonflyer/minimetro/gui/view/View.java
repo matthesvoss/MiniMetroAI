@@ -1,7 +1,6 @@
 package me.dragonflyer.minimetro.gui.view;
 
 import me.dragonflyer.minimetro.gui.controller.Controller;
-import me.dragonflyer.minimetro.gui.controller.MouseEventListener;
 import me.dragonflyer.minimetro.gui.model.Model;
 import me.dragonflyer.minimetro.gui.model.entities.Line;
 import me.dragonflyer.minimetro.gui.model.entities.LineSection;
@@ -14,6 +13,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 
 public class View extends JPanel {
 
@@ -152,10 +154,29 @@ public class View extends JPanel {
     }
 
     private void addMouseListeners() {
-        MouseEventListener mouseEventListener = new MouseEventListener(controller);
-        addMouseListener(mouseEventListener);
-        addMouseMotionListener(mouseEventListener);
-        addMouseWheelListener(mouseEventListener);
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                controller.mouseClicked(e);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                controller.mousePressed(e);
+            }
+        });
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                controller.mouseWheelMoved(e);
+            }
+        });
+        addMouseWheelListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                controller.mouseDragged(e);
+            }
+        });
     }
 
     private void loadImages() {
