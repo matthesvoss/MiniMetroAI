@@ -22,5 +22,5 @@ java {
 }
 
 application {
-    mainClassName = 'me.dragonflyer.minimetro.Main'
+    mainClass.set('me.dragonflyer.minimetro.Main')
 }
