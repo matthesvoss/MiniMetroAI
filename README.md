@@ -1,4 +1,4 @@
-# MiniMetroAI
+# Mini Metro AI
 
 A tool to find the optimal layout of lines in the game [Mini Metro](https://dinopoloclub.com/games/mini-metro/).
 
